@@ -1,0 +1,13 @@
+A1 kyllä
+A2 kyllä
+A3 ei
+A4 kyllä
+A5 kyllä
+A6 kyllä
+B1 kyllä
+B2 kyllä
+B3 kyllä
+C1 kyllä
+C2 kyllä
+C3 kyllä
+C4 kyllä
