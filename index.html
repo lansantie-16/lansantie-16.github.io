@@ -39,7 +39,6 @@ h2{font-size:1.05rem;font-weight:700}
 section{display:flex;flex-direction:column;gap:10px}
 .mine{display:flex;flex-wrap:wrap;gap:6px}
 .mine button{font:700 1rem var(--display);min-width:48px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
-.mine button.off{color:var(--muted);border-style:dashed;text-decoration:line-through}
 .mine button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
 button:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 #mineOut{color:var(--fg);min-height:1.5em}
@@ -111,7 +110,6 @@ footer{color:var(--muted);font-size:.85rem}
     </table></div>
   </details>
 
-  <footer id="foot">Vuoro vaihtuu maanantaina.</footer>
 </div>
 
 <script>
@@ -211,10 +209,9 @@ footer{color:var(--muted);font-size:.85rem}
       var f=up[0];var cur=today>=f.s&&today<=f.e;
       out.textContent=a+": "+(cur?"vuoro on nyt "+range(f):"seuraava vuoro "+range(f))+(up.length>1?" · sitten "+up.slice(1).map(range).join(" ja "):"");
     }
-    var offList=cfg.all.filter(function(a){return cfg.list.indexOf(a)<0});
-    cfg.all.forEach(function(a){var b=document.createElement("button");if(cfg.list.indexOf(a)<0)b.className="off";b.type="button";b.id="hsto-"+a;b.dataset.a=a;b.textContent=a;b.setAttribute("aria-pressed","false");b.onclick=function(){if(b.getAttribute("aria-pressed")==="true"){b.setAttribute("aria-pressed","false");out.textContent=""}else show(a)};box.appendChild(b)});
+    cfg.list.forEach(function(a){var b=document.createElement("button");b.type="button";b.id="hsto-"+a;b.dataset.a=a;b.textContent=a;b.setAttribute("aria-pressed","false");b.onclick=function(){if(b.getAttribute("aria-pressed")==="true"){b.setAttribute("aria-pressed","false");out.textContent=""}else show(a)};box.appendChild(b)});
 
-    $("foot").textContent="Vuoro vaihtuu maanantaina. Kierron järjestys: "+cfg.list.join(", ")+"."+(offList.length?" Ei osallistu: "+offList.join(", ")+".":"");
+    if($("foot"))$("foot").textContent="Vuoro vaihtuu maanantaina. Kierron järjestys: "+cfg.list.join(", ")+".";
   }
 
   fetch("vuorot.txt",{cache:"no-store"})
