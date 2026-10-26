@@ -1,6 +1,5 @@
 A1 kyllä
-A2 kyllä
-A3 ei
+A2 ei talvella
 A4 kyllä
 A5 kyllä
 A6 kyllä

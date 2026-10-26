@@ -130,23 +130,25 @@ footer{color:var(--muted);font-size:.85rem}
   // Oletusasetukset, jos vuorot.txt-tiedostoa ei löydy
   var DEFAULT={start:new Date(2026,10,23),startApt:"C1",
     list:["A1","A2","A4","A5","A6","B1","B2","B3","C1","C2","C3","C4"],
+    winterOff:["A2"],
     all:["A1","A2","A3","A4","A5","A6","B1","B2","B3","C1","C2","C3","C4"],
     tasks:{16:"Vesimittarihuoneen lämmityksen poisto",17:"Tarkasta lämmityksen poisto",41:"Vesimittarihuoneen lämmitys päälle",42:"Tarkasta vesimittarihuoneen lämmitys"}};
 
   // vuorot.txt: yksi rivi per huoneisto, esim. "A3 ei" tai "A4 kyllä"
   var ORDER=["A1","A2","A3","A4","A5","A6","B1","B2","B3","C1","C2","C3","C4"];
   function parse(txt){
-    var list=[],all=[];
+    var list=[],all=[],winterOff=[];
     txt.split(/\r?\n/).forEach(function(line){
       var m=line.trim().match(/^([A-Za-z]\d+)\s*[:=-]?\s*(\S+)/);
       if(m&&all.indexOf(m[1].toUpperCase())<0)all.push(m[1].toUpperCase());
+      if(m&&/talv/i.test(line)){list.push(m[1].toUpperCase());winterOff.push(m[1].toUpperCase());return}
       if(m&&/^(kyll[äa]|k|x|1|on|joo)$/i.test(m[2]))list.push(m[1].toUpperCase());
     });
     if(!list.length)return null;
     // Kierto jatkuu C1:stä 23.11.2026, tai seuraavasta osallistuvasta
     var pos=ORDER.indexOf("C1"),startApt=list[0];
     for(var i=0;i<list.length;i++){var p=ORDER.indexOf(list[i]);if(p>=pos){startApt=list[i];break}}
-    return {start:DEFAULT.start,startApt:startApt,list:list,all:all,tasks:DEFAULT.tasks};
+    return {start:DEFAULT.start,startApt:startApt,list:list,all:all,winterOff:winterOff,tasks:DEFAULT.tasks};
   }
 
   function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x}
@@ -162,10 +164,15 @@ footer{color:var(--muted);font-size:.85rem}
     var startK=Math.round((monday-START)/(7*864e5));
     var i0=Math.max(0,cfg.list.indexOf(cfg.startApt));
     var nowK=Math.floor(Math.round((today-START)/864e5)/7);
-    var W=[];
+    var W=[],p=i0,L=cfg.list.length,off=cfg.winterOff||[];
     for(var k=0;k<=Math.max(nowK,0)+60;k++){
       var s=addDays(START,k*7),wk=isoWeek(s),apt,task;
-      if(k>=startK){apt=cfg.list[(i0+k-startK)%cfg.list.length]}
+      if(k>=startK){
+        // Talvi = joulu–maaliskuu (viikon torstain mukaan); talvella poissaolevat ohitetaan
+        var mo=addDays(s,3).getMonth(),winter=(mo===11||mo<=2),n=0;
+        while(winter&&off.indexOf(cfg.list[p%L])>=0&&n<L){p++;n++}
+        apt=cfg.list[p%L];p++;
+      }
       else if(k<DATA.length){apt=DATA[k][1]}
       else{apt=OLD_CYCLE[(k-17)%12]}
       task=k<DATA.length?(DATA[k][2]||""):(cfg.tasks[wk]||"");
